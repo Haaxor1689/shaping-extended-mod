@@ -42,8 +42,6 @@ This mod extends the shaping radial menu with new options and also extends some 
 - **Siding** (can be rotated) - a flooring for your walls
 - **Mini Block** (can be rotated and flipped) - a centered mini block that support 8 rotations instead of just 4
 
-> **Side Slabs** are coming in the Early Access release and that's why I decided not to add them.
-
 ## Extended hammers capabilities
 
 Hammers are getting a set of new functions on their left click depending on what shaped block you are looking at.
