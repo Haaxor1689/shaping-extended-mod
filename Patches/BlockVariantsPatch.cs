@@ -1,23 +1,18 @@
 using Allumeria.Blocks.BlockModels;
 using Allumeria.Blocks.Blocks;
-using Allumeria.DataManagement.AssetLoading;
 using Allumeria.EntitySystem.Entities;
 using Allumeria.UI.UINodes;
 using HarmonyLib;
-using ShapingExtendedMod.BlockModels;
-using ShapingExtendedMod.Blocks;
-using Logger = Allumeria.Logger;
+using ShapingExtended.BlockModels;
+using ShapingExtended.Blocks;
 
-namespace ShapingExtendedMod.Patches;
+namespace ShapingExtended.Patches;
 
 internal struct BlockVariantData
 {
     public string Name;
-
-    public AtlasTexture? Texture;
-
+    public int TextureId;
     public BlockModel Model;
-
     public Type BlockConstructor;
 }
 
@@ -29,100 +24,104 @@ internal static class BlockVariantsPatch
         new BlockVariantData
         {
             Name = "Stair",
+            TextureId = UIRendererPatch.RegisterTexture("stair"),
             Model = BlockModelQuads.stair_model,
             BlockConstructor = typeof(BlockStairs),
         },
         new BlockVariantData
         {
             Name = "Inner Corner Stair",
+            TextureId = UIRendererPatch.RegisterTexture("inner_corner_stair"),
             Model = BlockModelRegistry.inner_corner_stairs,
             BlockConstructor = typeof(BlockInnerCornerStairs),
         },
         new BlockVariantData
         {
             Name = "Outer Corner Stair",
+            TextureId = UIRendererPatch.RegisterTexture("outer_corner_stair"),
             Model = BlockModelRegistry.outer_corner_stairs,
             BlockConstructor = typeof(BlockOuterCornerStairs),
         },
         new BlockVariantData
         {
-            Name = "Side Stair",
+            Name = "Vertical Stair",
+            TextureId = UIRendererPatch.RegisterTexture("side_stair"),
             Model = BlockModelRegistry.side_stairs,
             BlockConstructor = typeof(BlockSideStairs),
         },
         new BlockVariantData
         {
             Name = "Slab",
+            TextureId = UIRendererPatch.RegisterTexture("slab"),
+            Model = BlockModelQuads.slab_model,
+            BlockConstructor = typeof(BlockSlab),
+        },
+        new BlockVariantData
+        {
+            Name = "Vertical Slab",
+            TextureId = UIRendererPatch.RegisterTexture("side_slab"),
             Model = BlockModelQuads.slab_model,
             BlockConstructor = typeof(BlockSlab),
         },
         new BlockVariantData
         {
             Name = "Step",
+            TextureId = UIRendererPatch.RegisterTexture("step"),
             Model = BlockModelRegistry.step,
             BlockConstructor = typeof(BlockStep),
         },
         new BlockVariantData
         {
-            Name = "Side Step",
+            Name = "Vertical Step",
+            TextureId = UIRendererPatch.RegisterTexture("side_step"),
             Model = BlockModelRegistry.side_step,
             BlockConstructor = typeof(BlockSideStep),
         },
         new BlockVariantData
         {
             Name = "Panel",
+            TextureId = UIRendererPatch.RegisterTexture("panel"),
             Model = BlockModelQuads.panel,
             BlockConstructor = typeof(BlockPanel),
         },
         new BlockVariantData
         {
             Name = "Fence",
+            TextureId = UIRendererPatch.RegisterTexture("fence"),
             Model = BlockModelQuads.fence,
             BlockConstructor = typeof(BlockFence),
         },
         new BlockVariantData
         {
             Name = "Flooring",
+            TextureId = UIRendererPatch.RegisterTexture("flooring"),
             Model = BlockModelRegistry.flooring,
             BlockConstructor = typeof(BlockFlooring),
         },
         new BlockVariantData
         {
             Name = "Siding",
+            TextureId = UIRendererPatch.RegisterTexture("siding"),
             Model = BlockModelRegistry.siding,
             BlockConstructor = typeof(BlockSiding),
         },
         new BlockVariantData
         {
+            Name = "Column",
+            TextureId = UIRendererPatch.RegisterTexture("column"),
+            Model = BlockModelQuads.log,
+            BlockConstructor = typeof(Block),
+        },
+        new BlockVariantData
+        {
             Name = "Mini Block",
+            TextureId = UIRendererPatch.RegisterTexture("mini_block"),
             Model = BlockModelRegistry.mini_block,
             BlockConstructor = typeof(BlockMini),
         },
     ];
 
     internal static readonly Dictionary<Block, Block[]> AddedVariants = [];
-
-    internal const string IconDirectory = "textures/atlas/ui";
-
-    // Load all the variant icons into the texture atlas manually
-    internal static void Initialize(string modId)
-    {
-        for (var i = 0; i < Variants.Length; i++)
-        {
-            var spriteString =
-                $"ignitron/{modId}/{IconDirectory}/{ToSnakeCase(Variants[i].Name)}".Replace(
-                    '/',
-                    '.'
-                );
-
-            Variants[i].Texture = AssetManager.itemAtlas.atlasTexturesByString.GetValueOrDefault(
-                spriteString
-            );
-
-            if (Variants[i].Texture == null)
-                Logger.Warn($"Missing icon '{spriteString}' for variant '{Variants[i].Name}'");
-        }
-    }
 
     private static string ToSnakeCase(string name) => name.ToLowerInvariant().Replace(' ', '_');
 
@@ -164,7 +163,10 @@ internal static class BlockVariantsPatch
         for (var i = 0; i < Variants.Length; i++)
         {
             var variant = Variants[i];
-            menu.AddItem(new RadialItem(-1, i, variant.Name), 60);
+            menu.AddItem(
+                new RadialItem(UIRendererPatch.TextureMarker, variant.TextureId, variant.Name),
+                60
+            );
         }
         return false;
     }

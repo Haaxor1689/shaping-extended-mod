@@ -9,7 +9,11 @@ using Allumeria.Items;
 using Allumeria.Items.ItemTagTypes;
 using Allumeria.Items.ItemTypes;
 using HarmonyLib;
-using ShapingExtendedMod.Blocks;
+using ShapingExtended.Blocks;
+using ShapingExtended.BlockStates;
+using Logger = Allumeria.Logger;
+
+namespace ShapingExtended.Patches;
 
 [HarmonyPatch(typeof(Item))]
 public static class OnLeftClickUsePatch
@@ -36,11 +40,7 @@ public static class OnLeftClickUsePatch
         switch (lookingAtBlock)
         {
             case BlockSlab:
-                metadata = RotateOrFlip(
-                    BlockSlab.state,
-                    player.lookingAtMetadata,
-                    allowFlip: false
-                );
+                metadata = RotateOrFlip(BlockSlab.state, player.lookingAtMetadata);
                 break;
             case BlockStairs:
                 metadata = RotateOrFlip(
@@ -64,12 +64,12 @@ public static class OnLeftClickUsePatch
                     rotated.IsFlippable()
                 );
                 break;
-            case BlockFence fence:
-                if (!TryToggleBlockedDirection(fence.state, player.lookingAtMetadata, out metadata))
+            case BlockFence:
+                if (!TryToggleBlockedDirection(player.lookingAtMetadata, out metadata))
                     return false;
                 break;
-            case BlockPanel panel:
-                if (!TryToggleBlockedDirection(panel.state, player.lookingAtMetadata, out metadata))
+            case BlockPanel:
+                if (!TryToggleBlockedDirection(player.lookingAtMetadata, out metadata))
                     return false;
                 break;
             default:
@@ -126,16 +126,22 @@ public static class OnLeftClickUsePatch
         return state.ConvertToInt();
     }
 
-    private static bool TryToggleBlockedDirection(
-        BlockStateFence blockState,
-        uint currentMetadata,
-        out uint metadata
-    )
+    private static uint RotateOrFlip(BlockSlab.BlockStateSlab state, uint currentMetadata)
+    {
+        state.SetFromInt(currentMetadata);
+
+        if (!state.vertical && InputManager.sneak.IsDown())
+            state.upside_down = !state.upside_down;
+        else
+            state.facing = (byte)((state.facing + 2) % 8);
+
+        return state.ConvertToInt();
+    }
+
+    private static bool TryToggleBlockedDirection(uint currentMetadata, out uint metadata)
     {
         metadata = currentMetadata;
-        if (blockState is not BlockStateFenceExtended state)
-            return false;
-
+        var state = new BlockStateFenceExtended();
         state.SetFromInt(currentMetadata);
 
         var facing = Game.camera.front.Xz;

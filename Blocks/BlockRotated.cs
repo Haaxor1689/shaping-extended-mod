@@ -6,9 +6,9 @@ using Allumeria.EntitySystem;
 using Allumeria.EntitySystem.Entities;
 using Allumeria.Settings;
 using OpenTK.Mathematics;
-using ShapingExtendedMod.BlockModels;
+using ShapingExtended.BlockModels;
 
-namespace ShapingExtendedMod.Blocks;
+namespace ShapingExtended.Blocks;
 
 public abstract class BlockRotated(string strID) : Block(strID)
 {

@@ -1,6 +1,6 @@
-using Allumeria.Blocks.Blocks;
+using Allumeria.Blocks.BlockVariants;
 
-namespace ShapingExtendedMod.Blocks;
+namespace ShapingExtended.BlockStates;
 
 /// <summary>
 /// Fence/panel state that additionally tracks per-direction connection blocking.
@@ -8,9 +8,14 @@ namespace ShapingExtendedMod.Blocks;
 /// live in bits 4-7. The inherited xpos/xneg/zpos/zneg fields hold the effective connection, because
 /// vanilla reads those fields directly.
 /// </summary>
-internal class BlockStateFenceExtended : BlockStateFence
+internal struct BlockStateFenceExtended() : IBlockState
 {
     private const int BlockedShift = 4;
+
+    public bool xpos = false;
+    public bool xneg = false;
+    public bool zpos = false;
+    public bool zneg = false;
 
     public bool xPosRaw;
     public bool xNegRaw;
@@ -22,7 +27,7 @@ internal class BlockStateFenceExtended : BlockStateFence
     public bool zPosBlock;
     public bool zNegBlock;
 
-    public override uint ConvertToInt()
+    public uint ConvertToInt()
     {
         uint value = 0;
         if (xPosRaw)
@@ -46,7 +51,7 @@ internal class BlockStateFenceExtended : BlockStateFence
         return value;
     }
 
-    public override void SetFromInt(uint value)
+    public void SetFromInt(uint value)
     {
         xPosRaw = (value & 1u) != 0;
         xNegRaw = (value & 2u) != 0;

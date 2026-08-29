@@ -4,7 +4,7 @@ using Allumeria.Items.ItemTypes;
 using Allumeria.UI.UINodes;
 using HarmonyLib;
 
-namespace ShapingExtendedMod.Patches;
+namespace ShapingExtended.Patches;
 
 [HarmonyPatch(typeof(ItemHammer))]
 internal static class ItemHammerPatch

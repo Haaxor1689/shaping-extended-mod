@@ -1,24 +1,18 @@
-using Allumeria;
 using Allumeria.Blocks.Blocks;
+using Allumeria.Blocks.BlockVariants;
 using Allumeria.ChunkManagement;
 using HarmonyLib;
-using ShapingExtendedMod.Blocks;
+using ShapingExtended.BlockStates;
 
-namespace ShapingExtendedMod.Patches;
+namespace ShapingExtended.Patches;
 
 internal static class FenceConnections
 {
-    internal static bool UpdateState(
-        Block block,
-        BlockStateFence blockState,
-        int x,
-        int y,
-        int z,
-        World world
-    )
+    internal static bool UpdateState(Block block, int x, int y, int z, World world)
     {
-        if (blockState is not BlockStateFenceExtended state)
-            return true;
+        // BlockFence/BlockPanel's own state field is a fixed struct, so the extended state
+        // used to derive the effective (post-blocking) connection bits is only ever local.
+        var state = new BlockStateFenceExtended();
 
         // Vanilla never reads the stored metadata, so the blocked flags have to be reloaded here.
         state.SetFromInt(world.chunkManager.GetBlockWithMetadata(x, y, z).metadata);
@@ -42,21 +36,37 @@ internal static class FenceConnections
         return false;
     }
 
-    internal static bool GetRotatedMetadata(
-        BlockStateFence blockState,
-        uint metadata,
-        int rotation,
-        ref uint __result
-    )
+    internal static bool GetRotatedMetadata(uint metadata, int rotation, ref uint __result)
     {
-        if (blockState is not BlockStateFenceExtended state)
-            return true;
-
+        var state = new BlockStateFenceExtended();
         state.SetFromInt(metadata);
         state.Rotate(rotation);
         __result = state.ConvertToInt();
 
         return false;
+    }
+
+    /// <summary>
+    /// Vanilla's own BlockStateFence only ever reads bits 0-3 of metadata as the connections,
+    /// so rewriting those bits to the blocked-aware values before GetColliders/GetModelFlags run
+    /// makes the unpatched vanilla code display the effective (post-blocking) state correctly.
+    /// </summary>
+    internal static void RewriteToEffectiveConnections(ref uint metadata)
+    {
+        var state = new BlockStateFenceExtended();
+        state.SetFromInt(metadata);
+
+        uint effective = 0;
+        if (state.xpos)
+            effective |= 1u;
+        if (state.xneg)
+            effective |= 2u;
+        if (state.zpos)
+            effective |= 4u;
+        if (state.zneg)
+            effective |= 8u;
+
+        metadata = (metadata & ~0xFu) | effective;
     }
 
     private static bool CanConnect(World world, int x, int y, int z)
@@ -71,45 +81,47 @@ internal static class FenceConnections
 [HarmonyPatch(typeof(BlockFence))]
 internal static class BlockFenceConnectionPatch
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(MethodType.Constructor, typeof(string))]
-    private static void Constructor(BlockFence __instance) =>
-        __instance.state = new BlockStateFenceExtended();
-
     [HarmonyPrefix]
     [HarmonyPatch(nameof(BlockFence.UpdateState))]
     private static bool UpdateState(BlockFence __instance, int x, int y, int z, World world) =>
-        FenceConnections.UpdateState(__instance, __instance.state, x, y, z, world);
+        FenceConnections.UpdateState(__instance, x, y, z, world);
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(BlockFence.GetRotatedMetadata))]
-    private static bool GetRotatedMetadata(
-        BlockFence __instance,
-        uint metadata,
-        int rotation,
-        ref uint __result
-    ) => FenceConnections.GetRotatedMetadata(__instance.state, metadata, rotation, ref __result);
+    private static bool GetRotatedMetadata(uint metadata, int rotation, ref uint __result) =>
+        FenceConnections.GetRotatedMetadata(metadata, rotation, ref __result);
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(BlockFence.GetColliders))]
+    private static void GetColliders(ref uint metadata) =>
+        FenceConnections.RewriteToEffectiveConnections(ref metadata);
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(BlockFence.GetModelFlags))]
+    private static void GetModelFlags(ref uint metadata) =>
+        FenceConnections.RewriteToEffectiveConnections(ref metadata);
 }
 
 [HarmonyPatch(typeof(BlockPanel))]
 internal static class BlockPanelConnectionPatch
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(MethodType.Constructor, typeof(string))]
-    private static void Constructor(BlockPanel __instance) =>
-        __instance.state = new BlockStateFenceExtended();
-
     [HarmonyPrefix]
     [HarmonyPatch(nameof(BlockPanel.UpdateState))]
     private static bool UpdateState(BlockPanel __instance, int x, int y, int z, World world) =>
-        FenceConnections.UpdateState(__instance, __instance.state, x, y, z, world);
+        FenceConnections.UpdateState(__instance, x, y, z, world);
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(BlockPanel.GetRotatedMetadata))]
-    private static bool GetRotatedMetadata(
-        BlockPanel __instance,
-        uint metadata,
-        int rotation,
-        ref uint __result
-    ) => FenceConnections.GetRotatedMetadata(__instance.state, metadata, rotation, ref __result);
+    private static bool GetRotatedMetadata(uint metadata, int rotation, ref uint __result) =>
+        FenceConnections.GetRotatedMetadata(metadata, rotation, ref __result);
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(BlockPanel.GetColliders))]
+    private static void GetColliders(ref uint metadata) =>
+        FenceConnections.RewriteToEffectiveConnections(ref metadata);
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(BlockPanel.GetModelFlags))]
+    private static void GetModelFlags(ref uint metadata) =>
+        FenceConnections.RewriteToEffectiveConnections(ref metadata);
 }

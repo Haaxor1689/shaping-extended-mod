@@ -1,6 +1,6 @@
 using Allumeria.Blocks.BlockModels;
 
-namespace ShapingExtendedMod.BlockModels;
+namespace ShapingExtended.BlockModels;
 
 public static class BlockModelRegistry
 {

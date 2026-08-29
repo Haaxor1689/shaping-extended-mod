@@ -1,18 +1,18 @@
-﻿<Project Sdk="Ignitron.Mod.Sdk/0.8.2.1">
+﻿<Project Sdk="Ignitron.Mod.Sdk/0.8.5">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <AssemblyName>shaping_extended_mod</AssemblyName>
-        <RootNamespace>ShapingExtendedMod</RootNamespace>
+        <RootNamespace>ShapingExtended</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- Keep template resources flat, then place them under the mod ID at build output. -->
+        <!-- Place assets under the mod ID at build output. -->
         <Content Include="Content\**\*.*"
              CopyToOutputDirectory="PreserveNewest"
-             Link="ignitron\shaping_extended_mod\%(RecursiveDir)%(Filename)%(Extension)"/>
+             Link="ignitron\$(AssemblyName)\%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 </Project>
