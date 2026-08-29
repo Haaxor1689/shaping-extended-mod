@@ -24,7 +24,7 @@ Thanks to _Mirage_ and other community members in [this suggestions thread](http
 
 ### 1.1.0
 
-- Updated to Allumeria 0.15 early access release
+- Updated to **Allumeria 0.15** early access release
 - Added new Column and Vertical Slab shapes
 - Renamed all "Side" variants to "Vertical" for consistency
 
