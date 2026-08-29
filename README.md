@@ -18,6 +18,10 @@ Thanks to _Mirage_ and other community members in [this suggestions thread](http
 
 ## Changelog
 
+### 1.1.1
+
+- Slightly increased radial menu radius to better fit all the items
+
 ### 1.1.0
 
 - Updated to Allumeria 0.15 early access release

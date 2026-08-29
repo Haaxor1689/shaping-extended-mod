@@ -159,13 +159,13 @@ internal static class BlockVariantsPatch
     [HarmonyPatch(nameof(Block.OnRadialOpen))]
     internal static bool OnRadialOpen(PlayerEntity player, UIRadialMenu menu)
     {
-        menu.AddItem(new RadialItem(0, 224, nameof(Block)), 60);
+        menu.AddItem(new RadialItem(0, 224, nameof(Block)), 72);
         for (var i = 0; i < Variants.Length; i++)
         {
             var variant = Variants[i];
             menu.AddItem(
                 new RadialItem(UIRendererPatch.TextureMarker, variant.TextureId, variant.Name),
-                60
+                72
             );
         }
         return false;
