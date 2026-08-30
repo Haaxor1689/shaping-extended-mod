@@ -4,13 +4,14 @@
   "assembly_relative_path": "shaping_extended_mod.dll",
   "id": "shaping_extended_mod",
   "display_name": "Shaping Extended",
+  "description": "Adds new block shapes and a new hammer behaviour.",
   "contributors": [
     {
       "name": "haaxor1689",
       "role": "author"
     }
   ],
-  "version": "1.1.1",
+  "version": "1.1.2",
   "dependencies": [
     {
       "id": "allumeria",
