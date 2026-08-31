@@ -1,3 +1,5 @@
+> DEPRECATED! Migrated to https://codeberg.org/Haaxor1689/shaping-extended-mod
+
 # Shaping Extended
 
 ![Extended radial menu](/assets/radial_menu.png)
